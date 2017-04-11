@@ -48,7 +48,12 @@ tasks:
        # - "/{? folder.root ?}{? folder.downmanual ?}"
       recursive: yes
       retrieve: files
-      regexp: '.*\.(avi|mkv|mp4)$'
+      regexp: 
+        accept: 
+          - '.*\.(avi|mkv|mp4)$'
+        reject: 
+          - '.*(rarbg|RARBG).mp4'
+          - 's100'
     accept_all: yes
     move:
       to: "/{? folder.root ?}{? folder.series ?}{{tvdb_series_name|escape|replace('&#39;', '')|default(series_name)|pathscrub}}/S{{tvdb_season|pad(2)}}/"
