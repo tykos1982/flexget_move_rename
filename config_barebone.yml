@@ -48,13 +48,12 @@ tasks:
        # - "/{? folder.root ?}{? folder.downmanual ?}"
       recursive: yes
       retrieve: files
-      regexp: 
-        accept: 
-          - '.*\.(avi|mkv|mp4)$'
-        reject: 
-          - '.*(rarbg|RARBG).mp4'
-          - 's100'
+      regexp: '.*\.(avi|mkv|mp4)$'
     accept_all: yes
+    regexp:
+      reject:
+        - .*(rarbg|RARBG).mp4
+        - .*s100.*
     move:
       to: "/{? folder.root ?}{? folder.series ?}{{tvdb_series_name|escape|replace('&#39;', '')|default(series_name)|pathscrub}}/S{{tvdb_season|pad(2)}}/"
       rename: "{{tvdb_series_name|escape|replace('&#39;', '')|default(series_name)|pathscrub}} - {{tvdb_ep_id|default(series_id)}}{% if tvdb_ep_name|default(False) %} - {{tvdb_ep_name|pathscrub}}{% endif %}{% if quality|default(False) %} - [{{quality}}]{% endif %}"
@@ -67,7 +66,7 @@ tasks:
      # clean_source: 50
     regexp:
       reject:
-        - rarbg.mp4
+        - .*(rarbg|RARBG).mp4
     list_add:
       - subtitle_list:
           list: subtitles
