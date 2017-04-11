@@ -1,0 +1,78 @@
+variables: my_secrets.yml
+templates:
+
+##### ADVANCED SETTINGS #####
+##### Global config
+#
+  global:
+    no_entries_ok: yes
+    pathscrub: windows
+
+
+##### Disable builtins for some tasks
+#
+  disable-seen-retry:
+    disable:
+      - seen
+      - seen_info_hash
+      - retry_failed
+
+##### Series metainfo mainly for move and update tasks
+#
+  series-metainfo:
+    metainfo_series: yes
+    thetvdb_lookup: yes
+   # require_field: series_name #---->SENZA QUESTO NON TROVA I NOMI SERIE DA TVDB
+
+##### Guessit parsing for some series tasks, not applied to all tasks because it causes issues with "name (year)" based series, like scandal
+#
+  series-guessit:
+    parsing:
+      series: guessit
+
+tasks:
+
+########## LIBRARY ##########
+
+##### Move series from downloads folder to respective folders, along with existing subtitles and adding the files to the subtitle queue
+#
+  move-series:
+    priority: 1
+    template:
+      - disable-seen-retry
+      - series-metainfo
+     # - pushbullet
+    filesystem:
+      path:
+        - "/{? folder.root ?}{? folder.downseries ?}"
+       # - "/{? folder.root ?}{? folder.downmanual ?}"
+      recursive: yes
+      retrieve: files
+      regexp: '.*\.(avi|mkv|mp4)$'
+    accept_all: yes
+    move:
+      to: "/{? folder.root ?}{? folder.series ?}{{tvdb_series_name|escape|replace('&#39;', '')|default(series_name)|pathscrub}}/S{{tvdb_season|pad(2)}}/"
+      rename: "{{tvdb_series_name|escape|replace('&#39;', '')|default(series_name)|pathscrub}} - {{tvdb_ep_id|default(series_id)}}{% if tvdb_ep_name|default(False) %} - {{tvdb_ep_name|pathscrub}}{% endif %}{% if quality|default(False) %} - [{{quality}}]{% endif %}"
+      along:
+        extensions:
+          - srt
+          - sub
+        subdirs:
+          - Subs
+     # clean_source: 50
+    regexp:
+      reject:
+        - rarbg.mp4
+    list_add:
+      - subtitle_list:
+          list: subtitles
+          path: "{{location}}"
+          remove_after: 7 days
+  #  kodi_library:
+   #   action: scan
+   #   category: video
+   #   url: http://192.168.254.8
+   #   port: 8080
+  #  exec:
+   #   on_exit:
+   #     phase: find "/{? folder.root ?}{? folder.downseries ?}"* -type d -empty -delete
